@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ginhawa - First Aid for Life</title>
+  <style>
+    :root {
+      --bg: #0F141C;
+      --card: #18202C;
+      --border: #263346;
+      --accent-warm: #E5A967;
+      --accent-rose: #E27B88;
+      --accent-cyan: #64B5F6;
+      --accent-mint: #81C784;
+      --text: #EAEFF5;
+      --muted: #8A99AD;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 90px;
+    }
+    header {
+      background: rgba(24, 32, 44, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .brand h1 { font-size: 19px; color: var(--accent-warm); letter-spacing: 0.5px; }
+    .brand p { font-size: 11px; color: var(--muted); }
+    .audio-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--accent-warm);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .audio-btn.active {
+      background: var(--accent-warm);
+      color: #111;
+    }
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+    .tab { display: none; }
+    .tab.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .hero-banner {
+      background: linear-gradient(145deg, #1C2738 0%, #161E2B 100%);
+      border-left: 4px solid var(--accent-warm);
+    }
+    .hero-banner h2 { font-size: 18px; color: var(--accent-warm); margin-bottom: 4px; }
+    .hero-banner p { font-size: 13px; color: var(--muted); }
+
+    /* Pain Category Selector Grid */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .pain-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .pain-card:active { transform: scale(0.97); }
+    .pain-card span.emoji { font-size: 28px; }
+    .pain-card strong { font-size: 13px; }
+    .pain-card small { font-size: 10px; color: var(--muted); }
+
+    .card-heart { border-top: 3px solid var(--accent-rose); }
+    .card-wallet { border-top: 3px solid var(--accent-warm); }
+    .card-body { border-top: 3px solid var(--accent-mint); }
+    .card-mind { border-top: 3px solid var(--accent-cyan); }
+
+    /* Checklist items */
+    .checklist { list-style: none; margin-top: 10px; }
+    .checklist li {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .checklist li strong { display: block; color: var(--text); }
+    .checklist li span { font-size: 11px; color: var(--muted); }
+
+    /* Burner / Release Canvas Area */
+    .burner-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    textarea {
+      width: 100%;
+      background: #111722;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+    }
+    .btn-burn {
+      background: linear-gradient(135deg, #E27B88 0%, #D45463 100%);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #burnCanvas {
+      width: 100%;
+      height: 140px;
+      border-radius: 12px;
+      background: #090D14;
+      display: none;
+      margin-top: 8px;
+    }
+
+    /* 60s Breathing Pacer */
+    .pacer-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+    .pacer-orb {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #314561 0%, #182333 100%);
+      border: 2px solid var(--accent-cyan);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 1s ease-in-out;
+      box-shadow: 0 0 25px rgba(100, 181, 246, 0.2);
+    }
+    .pacer-orb.inhale { transform: scale(1.35); border-color: var(--accent-warm); }
+    .pacer-orb.hold { transform: scale(1.35); border-color: var(--accent-mint); }
+    .pacer-orb.exhale { transform: scale(1.0); border-color: var(--accent-cyan); }
+    .pacer-label { font-size: 15px; font-weight: bold; }
+    .pacer-timer { font-size: 24px; font-weight: 800; }
+
+    /* Bottom Navigation */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(24, 32, 44, 0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 100;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      font-size: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .nav-btn span.icon { font-size: 20px; }
+    .nav-btn.active { color: var(--accent-warm); font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>🕯️ Ginhawa</h1>
+      <p>Universal First-Aid for Life</p>
+    </div>
+    <button id="audioToggle" class="audio-btn" onclick="toggleHealingSound()">🎵 432Hz Calm</button>
+  </header>
+
+  <main class="container">
+
+    <!-- TAB 1: Pain Hub (Choose your pain) -->
+    <div id="tab-home" class="tab active">
+      <div class="card hero-banner">
+        <h2>Kamusta ka? Huminga muna.</h2>
+        <p>Pain comes in many forms. Select what is weighing heaviest on you right now, and let's handle it one micro-step at a time.</p>
+      </div>
+
+      <div class="pain-grid">
+        <div class="pain-card card-heart" onclick="showTab('heart')">
+          <span class="emoji">💔</span>
+          <strong>Heartbreak & Grief</strong>
+          <small>Sawi, loss, rejection</small>
+        </div>
+        <div class="pain-card card-wallet" onclick="showTab('wallet')">
+          <span class="emoji">💸</span>
+          <strong>Wallet & Broke</strong>
+          <small>Zero balance, money panic</small>
+        </div>
+        <div class="pain-card card-body" onclick="showTab('body')">
+          <span class="emoji">🩹</span>
+          <strong>Illness & Body Pain</strong>
+          <small>Sakit, burnout, zero energy</small>
+        </div>
+        <div class="pain-card card-mind" onclick="showTab('overwhelm')">
+          <span class="emoji">🌪️</span>
+          <strong>Total Overwhelm</strong>
+          <small>Everything hurts right now</small>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="color:var(--accent-warm); font-size:14px; margin-bottom:6px;">✨ What to remember today:</h3>
+        <p id="dailyMotto" style="font-size:13px; color:var(--text); font-style:italic;">"You do not have to solve your whole life before midnight. You only have to get through today."</p>
+      </div>
+    </div>
+
+    <!-- TAB 2: Heart Pain (Sawi, Breakup, Grief) -->
+    <div id="tab-heart" class="tab">
+      <div class="card" style="border-left: 4px solid var(--accent-rose);">
+        <h2 style="color:var(--accent-rose);">💔 For the Broken Heart</h2>
+        <p style="font-size:12px; color:var(--muted);">When a person left, someone died, or life broke your expectations.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-rose); margin-bottom:8px;">Emergency Rules for Today:</h3>
+        <ul class="checklist">
+          <li>
+            <span>📵</span>
+            <div>
+              <strong>Rule 1: Put the phone on Airplane Mode for 30 minutes</strong>
+              <span>Do not text them. No begging. No rereading old chat screenshots. Protect your peace.</span>
+            </div>
+          </li>
+          <li>
+            <span>💧</span>
+            <div>
+              <strong>Rule 2: Drink one glass of cold water</strong>
+              <span>Crying rapidly dehydrates your body, giving you a headache and fatigue.</span>
+            </div>
+          </li>
+          <li>
+            <span>🛌</span>
+            <div>
+              <strong>Rule 3: Wrap yourself in heavy blanket warmth</strong>
+              <span>Heartbreak activates the same neural pain centers as physical burns. Warmth physically calms the vagus nerve.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Worry Burner Feature -->
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-warm); margin-bottom:4px;">🔥 The Burn & Release Vault</h3>
+        <p style="font-size:11px; color:var(--muted); margin-bottom:10px;">Type what you wish you could say, your anger, or your sadness. Tap "Burn", and watch it dissolve into ash forever. (Nothing is saved).</p>
+        <div class="burner-box">
+          <textarea id="burnText" rows="3" placeholder="Write the heavy words here..."></textarea>
+          <button class="btn-burn" onclick="burnWords()">Burn & Release Into Embers 🔥</button>
+          <canvas id="burnCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Wallet Pain (Zero Money, Broke, Financial Panic) -->
+    <div id="tab-wallet" class="tab">
+      <div class="card" style="border-left: 4px solid var(--accent-warm);">
+        <h2 style="color:var(--accent-warm);">💸 For the Empty Wallet</h2>
+        <p style="font-size:12px; color:var(--muted);">When bills are due, savings are dry, and money stress is choking you.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-warm); margin-bottom:8px;">Zero-Peso Dopamine Menu (100% Free Comfort):</h3>
+        <ul class="checklist">
+          <li>
+            <span>🚿</span>
+            <div>
+              <strong>The Long Scalding/Cold Shower</strong>
+              <span>A free sensory reset. Cleanses cortisol and gives your brain a fresh baseline.</span>
+            </div>
+          </li>
+          <li>
+            <span>🚶</span>
+            <div>
+              <strong>The Aimless Neighborhood Stride</strong>
+              <span>Leave your wallet at home. Walk for 25 minutes. Movement signals your brain you are not trapped.</span>
+            </div>
+          </li>
+          <li>
+            <span>☕</span>
+            <div>
+              <strong>Hot Water with a Pinch of Salt or Calamansi</strong>
+              <span>Settles stomach acid caused by hunger, stress, and anxiety.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-warm); margin-bottom:8px;">Financial Reality Triage:</h3>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:8px;">When you are broke, you cannot think in 5-year plans. You only think in <strong>24-hour survival</strong>:</p>
+        <p style="font-size:13px; color:var(--text); padding-left:10px; border-left:2px solid var(--border);">
+          1. <strong>Food & Water first.</strong> Everything else can wait.<br>
+          2. <strong>Debt collector shame is not deadly.</strong> You are still worthy as a human being even if your bank account is at ₱0.00.<br>
+          3. <strong>Money comes and goes in seasons.</strong> You will not be in this exact spot forever.
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB 4: Body Pain (Physical Illness, Fever, Chronic Exhaustion) -->
+    <div id="tab-body" class="tab">
+      <div class="card" style="border-left: 4px solid var(--accent-mint);">
+        <h2 style="color:var(--accent-mint);">🩹 For the Sick & Aching Body</h2>
+        <p style="font-size:12px; color:var(--muted);">When illness, migraine, or physical exhaustion takes over.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-mint); margin-bottom:8px;">Low-Battery Mode (Only do what is necessary):</h3>
+        <ul class="checklist">
+          <li>
+            <span>⏸️</span>
+            <div>
+              <strong>Cancel the guilt of doing nothing</strong>
+              <span>Healing is an active biological job. When you sleep, your white blood cells and immune system are working hard.</span>
+            </div>
+          </li>
+          <li>
+            <span>🫁</span>
+            <div>
+              <strong>Drop your shoulders & unstick your tongue</strong>
+              <span>Notice right now: is your tongue pressed against the roof of your mouth? Drop it. Unclench your jaw.</span>
+            </div>
+          </li>
+          <li>
+            <span>🍵</span>
+            <div>
+              <strong>Warm fluid sip by sip</strong>
+              <span>Even warm tap water or broth helps blood vessels relax and reduces pain sensitivity.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAB 5: Total Overwhelm (60s Reset) -->
+    <div id="tab-overwhelm" class="tab">
+      <div class="card" style="text-align:center;">
+        <h2 style="color:var(--accent-cyan); font-size:18px;">60-Second Sensory Reset</h2>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">When all pains hit at once, sync your breath to this orb.</p>
+        
+        <div class="pacer-wrap">
+          <div id="pacerOrb" class="pacer-orb">
+            <span id="pacerState" class="pacer-label">Inhale</span>
+            <span id="pacerCount" class="pacer-timer">4</span>
+          </div>
+        </div>
+
+        <button id="pacerButton" class="audio-btn" style="padding:10px 24px; font-size:13px;" onclick="togglePacer()">Start 60s Breathing</button>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; color:var(--accent-cyan); margin-bottom:6px;">If you are thinking of giving up:</h3>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Please reach out right now. Free, kind human beings are listening:</p>
+        <p style="font-size:13px; font-weight:bold;">Philippines Crisis Hotlines (24/7):</p>
+        <p style="font-size:13px; margin-top:4px;">📞 <strong>1553</strong> (Toll-Free NCMH Landline)</p>
+        <p style="font-size:13px; margin-top:4px;">📱 <strong>0917-899-8727</strong> / <strong>0966-351-4518</strong></p>
+      </div>
+    </div>
+
+  </main>
+
+  <nav>
+    <button class="nav-btn active" onclick="showTab('home')"><span class="icon">🏠</span>Hub</button>
+    <button class="nav-btn" onclick="showTab('heart')"><span class="icon">💔</span>Heart</button>
+    <button class="nav-btn" onclick="showTab('wallet')"><span class="icon">💸</span>Wallet</button>
+    <button class="nav-btn" onclick="showTab('body')"><span class="icon">🩹</span>Body</button>
+    <button class="nav-btn" onclick="showTab('overwhelm')"><span class="icon">🌪️</span>Reset</button>
+  </nav>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+
+      const tabs = ['home', 'heart', 'wallet', 'body', 'overwhelm'];
+      const idx = tabs.indexOf(tabId);
+      const navButtons = document.querySelectorAll('.nav-btn');
+      if (idx !== -1 && navButtons[idx]) navButtons[idx].classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // --- Web Audio 432Hz Calm Resonance Tone ---
+    let audioCtx = null;
+    let osc = null;
+    let gainNode = null;
+    let soundPlaying = false;
+
+    function toggleHealingSound() {
+      const btn = document.getElementById('audioToggle');
+      if (soundPlaying) {
+        if (gainNode) gainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        setTimeout(() => { if (osc) { osc.stop(); osc = null; } }, 500);
+        soundPlaying = false;
+        btn.classList.remove('active');
+        btn.innerText = '🎵 432Hz Calm';
+      } else {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        osc = audioCtx.createOscillator();
+        gainNode = audioCtx.createGain();
+
+        // 432Hz (Calming Natural Frequency)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(432, audioCtx.currentTime);
+
+        gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 1.2);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start();
+
+        soundPlaying = true;
+        btn.classList.add('active');
+        btn.innerText = '⏹️ Stop Tone';
+      }
+    }
+
+    // --- The Worry Burner (Particle Incinerator Canvas) ---
+    function burnWords() {
+      const textarea = document.getElementById('burnText');
+      const val = textarea.value.trim();
+      if (!val) return;
+
+      const canvas = document.getElementById('burnCanvas');
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = 140;
+
+      textarea.value = '';
+      textarea.placeholder = "The words are turning into ash and floating away...";
+
+      // Generate glowing flame and ash particles
+      let particles = [];
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2 + (Math.random() * 120 - 60),
+          y: canvas.height - 15,
+          vx: (Math.random() - 0.5) * 2.5,
+          vy: -(Math.random() * 3 + 2),
+          life: 1.0,
+          color: Math.random() > 0.4 ? '#E27B88' : '#E5A967',
+          size: Math.random() * 4 + 2
+        });
+      }
+
+      function animateBurn() {
+        ctx.fillStyle = 'rgba(9, 13, 20, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let active = 0;
+        for (let p of particles) {
+          if (p.life > 0) {
+            active++;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        if (active > 0) {
+          requestAnimationFrame(animateBurn);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          canvas.style.display = 'none';
+          textarea.placeholder = "Released. Take a gentle breath.";
+        }
+      }
+      animateBurn();
+    }
+
+    // --- 60s Breathing Pacer ---
+    let pacerTimer = null;
+    let pacerRunning = false;
+
+    function togglePacer() {
+      const orb = document.getElementById('pacerOrb');
+      const stateLbl = document.getElementById('pacerState');
+      const countLbl = document.getElementById('pacerCount');
+      const btn = document.getElementById('pacerButton');
+
+      if (pacerRunning) {
+        clearInterval(pacerTimer);
+        pacerRunning = false;
+        orb.className = 'pacer-orb';
+        stateLbl.innerText = 'Inhale';
+        countLbl.innerText = '4';
+        btn.innerText = 'Start 60s Breathing';
+      } else {
+        pacerRunning = true;
+        btn.innerText = 'Stop Pacer';
+        let state = 'inhale';
+        let count = 4;
+
+        pacerTimer = setInterval(() => {
+          if (state === 'inhale') {
+            orb.className = 'pacer-orb inhale';
+            stateLbl.innerText = 'Inhale';
+            countLbl.innerText = count--;
+            if (count < 0) { state = 'hold'; count = 4; }
+          } else if (state === 'hold') {
+            orb.className = 'pacer-orb hold';
+            stateLbl.innerText = 'Hold';
+            countLbl.innerText = count--;
+            if (count < 0) { state = 'exhale'; count = 6; }
+          } else if (state === 'exhale') {
+            orb.className = 'pacer-orb exhale';
+            stateLbl.innerText = 'Exhale';
+            countLbl.innerText = count--;
+            if (count < 0) { state = 'inhale'; count = 4; }
+          }
+        }, 1000);
+      }
+    }
+  </script>
+</body>
+</html>
